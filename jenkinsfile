@@ -1,38 +1,23 @@
-pipeline {
-    agent any
-
-    stages {
-        stage('build') {
-            agent {
-                docker {
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh '''
-                   ls -la 
-                    node --version
-                    npm --version
-                    npm ci
-                    npm run build 
-                    ls -la
-                 '''
-            }
+stage('test') {
+    agent {
+        docker {
+            image 'node:18-alpine'
+            reuseNode true
         }
-        stage('test'){
-            agent {
-                docker {
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
-            steps{
-                sh '''
-                   test -f build/index.html
-                   npm test
-                '''
-            }
+    }
+    steps {
+        sh '''
+            test -f build/index.html
+            mkdir -p test-results
+            JEST_JUNIT_OUTPUT_DIR=test-results \
+            JEST_JUNIT_OUTPUT_NAME=junit.xml \
+            npm test -- --watchAll=false
+            ls -la test-results
+        '''
+    }
+    post {
+        always {
+            junit 'test-results/junit.xml'
         }
     }
 }
