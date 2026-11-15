@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -32,8 +33,10 @@ pipeline {
                     }
                     steps {
                         sh '''
-                            #test -f build/index.html
-                            npm test
+                            mkdir -p jest-results
+                            JEST_JUNIT_OUTPUT_DIR=jest-results \
+                            JEST_JUNIT_OUTPUT_NAME=junit.xml \
+                            npm test -- --watchAll=false
                         '''
                     }
                     post {
@@ -60,7 +63,14 @@ pipeline {
                     }
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([
+                                allowMissing: true,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: 'playwright-report',
+                                reportFiles: 'index.html',
+                                reportName: 'Playwright HTML Report'
+                            ])
                         }
                     }
                 }
