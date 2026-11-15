@@ -15,9 +15,5 @@ stage('test') {
             ls -la test-results
         '''
     }
-    post {
-        always {
-            junit 'test-results/junit.xml'
-        }
-    }
+   
 }
